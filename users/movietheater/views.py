@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.contrib.auth import login, authenticate
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .forms import SignUpForm, LoginForm
+from .models import Movie
+from .serializer import MovieSerializer
 
 
 def index(request):
@@ -9,7 +13,6 @@ def index(request):
         'products': ['Товар 1', 'Товар 2', 'Товар 3'],
     }
     return render(request, 'movietheater/index.html', context)
-
 
 def signup_view(request):
     if request.method == 'POST':
@@ -33,3 +36,20 @@ def login_view(request):
                 login(request, user)    
                 return redirect('index')  
     return render(request, 'registration/login.html', {'form': form})
+
+class MovieView(APIView):
+    def get(self, request):
+        output = [
+            {
+                "title": output.title,
+                "description": output.description,
+                "video_url": output.video_url,
+            } for output in Movie.objects.all()
+        ]
+        return Response(output)
+    
+    def post(self, request):
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
