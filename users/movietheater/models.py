@@ -11,7 +11,9 @@ class CustomUser(AbstractUser):
 class Movie(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField()
-    video_url = models.URLField(max_length=500)
+    video_file = models.FileField(upload_to='movies/')
+    thumbnail = models.ImageField(upload_to='anime_thumbnails/', blank=True)
 
     def __str__(self):
         return self.title
+

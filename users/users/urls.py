@@ -17,9 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.urls import re_path as url 
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.static import serve
 from movietheater.views import *
+from django.views.decorators.cache import cache_control
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', MovieView.as_view(), name='test name'),
-]
+    path('api/movies/', MovieView.as_view(), name='movies-list'),
+    path('media/movies/<path:path>', 
+         cache_control(no_cache=True)(stream_video), 
+         name='stream-video'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
