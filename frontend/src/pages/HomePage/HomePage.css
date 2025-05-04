@@ -1,0 +1,40 @@
+.home-page {
+    background-color: #f9f9f9; /* Светлый фон */
+    color: #333; /* Темный текст для контраста */
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    min-height: 100vh; /* Чтобы занять всю высоту экрана */
+  }
+  
+  h1 {
+    color: #444; /* Темно-серый цвет заголовка */
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 18px;
+    color: #888; /* Серый цвет для текста загрузки */
+  }
+  
+  .movie-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Центрируем список фильмов */
+  }
+  
+  .movie-item {
+    background-color: #fff; /* Белый фон для каждого элемента фильма */
+    border: 1px solid #e0e0e0; /* Светло-серая рамка */
+    border-radius: 8px; /* Скругленные углы */
+    margin: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень для глубины */
+    transition: transform 0.2s; /* Плавный эффект при наведении */
+  }
+  
+  .movie-item:hover {
+    transform: scale(1.05); /* Увеличение элемента при наведении */
+  }
+  

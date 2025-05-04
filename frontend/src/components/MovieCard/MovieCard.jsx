@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import './MovieCard.css'
 
 const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
@@ -9,17 +10,17 @@ const MovieCard = ({ movie }) => {
   };
 
   return (
-    <div className="movie-card" onClick={handleClick}>
-      <h2>{movie.title}</h2>
-      <p>{movie.description}</p>
-
-      {/* Показываем превью */}
-      <div className="thumbnail">
+    <div className="movie-card" onClick={() => navigate(`/movie/${movie.id}`)}>
+      <div className="thumbnail-container">
         <img 
           src={movie.thumbnail} 
-          alt={movie.title} 
-          style={{ width: '100%', height: 'auto', borderRadius: '8px' }} 
+          alt={movie.title}
+          className="thumbnail-image"
         />
+      </div>
+      <div className="movie-content">
+        <h2 className="movie-title">{movie.title}</h2>
+        <p className="movie-description">{movie.description}</p>
       </div>
     </div>
   );

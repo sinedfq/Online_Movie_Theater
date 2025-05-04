@@ -28,7 +28,6 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <h1>Коллекция фильмов</h1>
       <MovieList movies={movies} />
     </div>
   );

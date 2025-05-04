@@ -1,0 +1,117 @@
+/* MovieDetailPage.css */
+
+.movie-detail-page {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Основная секция с картинкой и текстом */
+.movie-header {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: flex-start;
+}
+
+/* Контейнер для картинки */
+.movie-poster {
+  flex: 0 0 auto;
+}
+
+.thumbnail-image-details {
+  max-width: 500px;
+  max-height: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+}
+
+/* MovieDetailPage.css */
+.quality-selector {
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  .quality-selector select {
+    padding: 0.3rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    margin-left: 0.5rem;
+  }
+
+/* Текстовая информация */
+.movie-info {
+  flex: 1;
+}
+
+.movie-info h1 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.movie-info p {
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Видео-секция */
+.video-wrapper {
+  width: 100%;
+  margin-top: 2rem;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.buffering-indicator {
+  padding: 1rem;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .movie-header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .thumbnail-image {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .movie-info h1 {
+    font-size: 1.8rem;
+  }
+  
+  .movie-info p {
+    font-size: 1rem;
+  }
+}
+
+/* Состояния загрузки */
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 2rem;
+}
+
+.error {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #d32f2f;
+  padding: 2rem;
+}

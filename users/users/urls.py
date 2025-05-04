@@ -26,6 +26,7 @@ from django.views.decorators.cache import cache_control
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/movies/', MovieView.as_view(), name='movies-list'),
+    path('api/movies/<int:pk>/', MovieView.as_view(), name='movie-detail'),
     path('media/movies/<path:path>', 
          cache_control(no_cache=True)(stream_video), 
          name='stream-video'),

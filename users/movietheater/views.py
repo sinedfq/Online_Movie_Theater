@@ -7,31 +7,41 @@ from .models import Movie
 import os
 import urllib.parse
 from wsgiref.util import FileWrapper
+from .serializer import MovieSerializer
+from django.http import FileResponse, HttpResponse, HttpResponseNotFound
+from pathlib import Path
+
+
+class MovieDetailView(APIView):
+    def get(self, request, pk):
+        try:
+            movie = Movie.objects.get(pk=pk)
+            serializer = MovieSerializer(movie, context={'request': request})
+            return Response(serializer.data)
+        except Movie.DoesNotExist:
+            return Response(status=404)
 
 class MovieView(APIView):
-    def get(self, request):
+    def get(self, request, pk=None):
+        if pk is not None:
+            # Получение одного фильма
+            try:
+                movie = Movie.objects.get(pk=pk)
+                serializer = MovieSerializer(movie, context={'request': request})
+                return Response(serializer.data)
+            except Movie.DoesNotExist:
+                return Response(status=404)
+        
+        # Получение списка фильмов (существующий код)
         movies = Movie.objects.all()
         data = []
         for movie in movies:
             try:
-                # Принудительно проверяем доступность файла
-                if not os.path.exists(movie.video_file.path):
-                    print(f"Missing file: {movie.video_file.path}")
-                    continue
-                    
-                data.append({
-                    "id": movie.id,
-                    "title": movie.title,
-                    "description": movie.description,
-                    "video_url": request.build_absolute_uri(movie.video_file.url),
-                    "thumbnail": request.build_absolute_uri(movie.thumbnail.url) if movie.thumbnail else None,
-                })
+                serializer = MovieSerializer(movie, context={'request': request})
+                data.append(serializer.data)
             except Exception as e:
                 print(f"Error with movie {movie.id}: {str(e)}")
         return Response(data)
-    
-from django.http import FileResponse, HttpResponse, HttpResponseNotFound
-from pathlib import Path
 
 def stream_video(request, path):
     try:
