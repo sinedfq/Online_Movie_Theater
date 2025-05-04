@@ -1,0 +1,155 @@
+/* Базовые стили карточки */
+.movie-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: linear-gradient(to bottom, #ffffff, #f5f5f5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .movie-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Контейнер для изображения с градиентом */
+  .thumbnail-container {
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    overflow: hidden;
+  }
+  
+  .thumbnail-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom, 
+      rgba(0,0,0,0) 60%, 
+      rgba(0,0,0,0.7) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
+  
+  .movie-card:hover .thumbnail-container::after {
+    opacity: 1;
+  }
+  
+  /* Изображение */
+  .thumbnail-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .movie-card:hover .thumbnail-image {
+    transform: scale(1.06);
+  }
+  
+  /* Контейнер для текста */
+  .movie-content {
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Эффект "Подробнее" при наведении */
+  .movie-card::before {
+    content: 'Подробнее →';
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    opacity: 0;
+    z-index: 2;
+    transition: all 0.4s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .movie-card:hover::before {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  
+  /* Заголовок */
+  .movie-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.3;
+    transition: color 0.3s ease;
+  }
+  
+  .movie-card:hover .movie-title {
+    color: #000;
+  }
+  
+  /* Описание */
+  .movie-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.3s ease;
+  }
+  
+  .movie-card:hover .movie-description {
+    color: #444;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .movie-card {
+      max-width: 100%;
+    }
+  
+    .movie-content {
+      padding: 0.8rem;
+    }
+  
+    .movie-title {
+      font-size: 1rem;
+    }
+  
+    .movie-description {
+      font-size: 0.85rem;
+      -webkit-line-clamp: 2;
+    }
+    
+    .movie-card::before {
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* Эффект нажатия */
+  .movie-card:active {
+    transform: translateY(-3px) scale(0.98);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }

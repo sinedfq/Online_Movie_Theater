@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchMovies } from '../../services/api';
 import VideoPlayer from '../../components/VideoPlayer/VideoPlayer';
+import './MovieDetailPage.css';
 
 const MovieDetailPage = () => {
   const { id } = useParams();
@@ -35,16 +36,31 @@ const MovieDetailPage = () => {
 
   return (
     <div className="movie-detail-page">
-      <h1>{movie.title}</h1>
-      <p>{movie.description}</p>
-      
+      <div className="movie-header">
+        <div className="movie-poster">
+          <img
+            src={movie.thumbnail}
+            alt={movie.title}
+            className="thumbnail-image-details"
+          />
+        </div>
+
+        <div className="movie-info">
+          <h1>{movie.title}</h1>
+          <p>{movie.description}</p>
+        </div>
+      </div>
+
       <div className="video-wrapper">
-        <VideoPlayer 
-          videoUrl={movie.video_url}
+        <VideoPlayer
+          video360p={movie.video_360p_url}
+          video720p={movie.video_720p_url}
+          video1080p={movie.video_1080p_url}
+          poster = {movie.thumbnail}
           movieId={movie.id}
           onBufferingChange={setIsBuffering}
         />
-        
+
         {isBuffering && (
           <div className="buffering-indicator">Буферизация...</div>
         )}

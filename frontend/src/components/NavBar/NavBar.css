@@ -1,0 +1,69 @@
+.navbar {
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: block;
+  min-width: 1200px;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar-logo {
+  color: #8e8e8e;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-item {
+  margin-left: 2rem;
+}
+
+.navbar-link {
+  color: #8e8e8e;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #f5a623;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+  }
+
+  .navbar-menu {
+    margin-top: 1rem;
+  }
+
+  .navbar-item {
+    margin: 0 1rem;
+  }
+}
+
+.logoIm {
+  width: 100px;
+  height: auto;
+  transition: transform 0.3s ease; /* Плавный переход */
+}
+
+.logoIm:hover {
+  transform: scale(1.1); /* Увеличение на 10% при наведении */
+}
