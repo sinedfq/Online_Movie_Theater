@@ -118,6 +118,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     transition: color 0.3s ease;
+    align-self: left;
   }
   
   .movie-card:hover .movie-description {

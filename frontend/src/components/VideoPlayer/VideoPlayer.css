@@ -145,3 +145,19 @@
   }
 }
 
+.select-quality:hover:not(:disabled) {
+  border-color: #6366f1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.select-quality:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.select-quality.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
+}

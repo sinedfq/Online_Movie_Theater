@@ -2,20 +2,63 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
-    # Добавляем дополнительные поля
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-
+    
     def __str__(self):
         return self.username
 
-class Movie(models.Model):
-    title = models.CharField(max_length=50)
+class Content(models.Model):
+    """Базовый класс для всего контента"""
+    CONTENT_TYPES = [
+        ('movie', 'Фильм'),
+        ('series', 'Сериал'),
+        ('video', 'Видео'),
+    ]
+    
+    title = models.CharField(max_length=150)
     description = models.TextField()
-    thumbnail = models.ImageField(upload_to='anime_thumbnails/', blank=True)
+    thumbnail = models.ImageField(upload_to='thumbnails/', blank=True)
+    typeOF = models.CharField(max_length=10, choices=CONTENT_TYPES)
+    
+    class Meta:
+        abstract = True
+
+class Movie(Content):
+    """Модель для фильмов"""
     video_360p = models.FileField(upload_to='movies/360p/', null=True, blank=True)
     video_720p = models.FileField(upload_to='movies/720p/', null=True, blank=True)
     video_1080p = models.FileField(upload_to='movies/1080p/', null=True, blank=True)
-
+    
+    def __str__(self):
+        return self.title
+    
+class Video(Content):
+    """Модель для фильмов"""
+    video_360p = models.FileField(upload_to='movies/360p/', null=True, blank=True)
+    video_720p = models.FileField(upload_to='movies/720p/', null=True, blank=True)
+    video_1080p = models.FileField(upload_to='movies/1080p/', null=True, blank=True)
+    
     def __str__(self):
         return self.title
 
+class Series(Content):
+    """Модель для сериалов (без сезонов)"""
+    def __str__(self):
+        return self.title
+
+class Episode(models.Model):
+    """Модель для эпизодов сериала"""
+    series = models.ForeignKey(Series, related_name='episodes', on_delete=models.CASCADE)
+    episode_number = models.PositiveIntegerField()
+    title = models.CharField(max_length=150)
+    description = models.TextField(blank=True, null=True)
+    video_360p = models.FileField(upload_to='series/360p/', null=True, blank=True)
+    video_720p = models.FileField(upload_to='series/720p/', null=True, blank=True)
+    video_1080p = models.FileField(upload_to='series/1080p/', null=True, blank=True)
+    
+    class Meta:
+        ordering = ['episode_number']
+        unique_together = ('series', 'episode_number')
+    
+    def __str__(self):
+        return f"{self.series.title} - Эпизод {self.episode_number}: {self.title}"

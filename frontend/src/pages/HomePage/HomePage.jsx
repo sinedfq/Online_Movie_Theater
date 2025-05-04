@@ -1,34 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { fetchMovies } from '../../services/api';
-import MovieList from '../../components/MovieList/MovieList'; // Изменённый импорт
-// import './HomePage.css';
+import { fetchContent } from '../../services/api';
+import ContentList from '../../components/MovieList/ContentList';
+import './HomePage.css';
 
 const HomePage = () => {
-  const [movies, setMovies] = useState([]);
+  const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadMovies = async () => {
+    const loadContent = async () => {
       try {
-        const data = await fetchMovies();
-        setMovies(data);
+        const data = await fetchContent();
+  
+        // Объединяем movies и series в один массив
+        const mergedContent = [
+          ...data.movies.map(movie => ({ ...movie, typeOF: 'movie' })),
+          ...data.series.map(series => ({ ...series, typeOF: 'series' })),
+          ...data.videos.map(video => ({ ...video, typeOF: 'video' }))
+        ];
+  
+        setContents(mergedContent);
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
-
-    loadMovies();
+  
+    loadContent();
   }, []);
+  
 
   if (loading) {
-    return <div className="loading">Загрузка списка фильмов...</div>;
+    return <div className="loading">Загрузка контента...</div>;
   }
 
   return (
     <div className="home-page">
-      <MovieList movies={movies} />
+      <ContentList contents={contents} />
     </div>
   );
 };

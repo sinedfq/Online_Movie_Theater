@@ -13,8 +13,8 @@ const Navbar = () => {
         
         <ul className="navbar-menu">
           <li className="navbar-item">
-            <Link to="/favorites" className="navbar-link">
-              Избранное
+            <Link to="/profile" className="navbar-link">
+              Профиль
             </Link>
           </li>
           <li className="navbar-item">
