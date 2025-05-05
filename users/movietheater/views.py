@@ -3,11 +3,12 @@ from django.conf import settings
 from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from wsgiref.util import FileWrapper
 import urllib.parse
 import os
-from .serializer import MovieSerializer, SeriesSerializer, EpisodeSerializer, VideoSerializer
+from .serializer import EpisodeScreenshotSerializer, MovieScreenshotSerializer, MovieSerializer, SeriesScreenshotSerializer, SeriesSerializer, EpisodeSerializer, VideoSerializer
 from .models import Movie, Series, Episode, Video
 
 class MovieDetailView(APIView):
@@ -181,3 +182,57 @@ class VideoView(APIView):
             except Exception as e:
                 print(f"Error with movie {video.id}: {str(e)}")
         return Response(data)
+    
+class ScreenshotMixin:
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def get_object(self, model_class, pk):
+        try:
+            return model_class.objects.get(pk=pk)
+        except model_class.DoesNotExist:
+            return None
+
+class MovieScreenshotView(APIView, ScreenshotMixin):
+    def post(self, request, movie_id):
+        movie = self.get_object(Movie, movie_id)
+        if not movie:
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        data = request.data.copy()
+        data['movie'] = movie.id
+        serializer = MovieScreenshotSerializer(data=data, context={'request': request})
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SeriesScreenshotView(APIView, ScreenshotMixin):
+    def post(self, request, series_id):
+        series = self.get_object(Series, series_id)
+        if not series:
+            return Response({'error': 'Series not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        data = request.data.copy()
+        data['series'] = series.id
+        serializer = SeriesScreenshotSerializer(data=data, context={'request': request})
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EpisodeScreenshotView(APIView, ScreenshotMixin):
+    def post(self, request, episode_id):
+        episode = self.get_object(Episode, episode_id)
+        if not episode:
+            return Response({'error': 'Episode not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        data = request.data.copy()
+        data['episode'] = episode.id
+        serializer = EpisodeScreenshotSerializer(data=data, context={'request': request})
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

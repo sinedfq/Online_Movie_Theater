@@ -19,6 +19,7 @@ class Content(models.Model):
     description = models.TextField()
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True)
     typeOF = models.CharField(max_length=10, choices=CONTENT_TYPES)
+    poster = models.ImageField(upload_to='posters/', blank=True, null=True)
     
     class Meta:
         abstract = True
@@ -33,7 +34,8 @@ class Movie(Content):
         return self.title
     
 class Video(Content):
-    """Модель для фильмов"""
+    """Модель для видео"""
+    author = models.CharField(null = True, blank= True)
     video_360p = models.FileField(upload_to='movies/360p/', null=True, blank=True)
     video_720p = models.FileField(upload_to='movies/720p/', null=True, blank=True)
     video_1080p = models.FileField(upload_to='movies/1080p/', null=True, blank=True)
@@ -62,3 +64,21 @@ class Episode(models.Model):
     
     def __str__(self):
         return f"{self.series.title} - Эпизод {self.episode_number}: {self.title}"
+
+class Screenshot(models.Model):
+    """Базовая модель для скриншотов"""
+    image = models.ImageField(upload_to='screenshots/')
+    caption = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        abstract = True
+
+class MovieScreenshot(Screenshot):
+    movie = models.ForeignKey(Movie, related_name='screenshots', on_delete=models.CASCADE)
+
+class SeriesScreenshot(Screenshot):
+    series = models.ForeignKey(Series, related_name='screenshots', on_delete=models.CASCADE)
+
+class EpisodeScreenshot(Screenshot):
+    episode = models.ForeignKey(Episode, related_name='screenshots', on_delete=models.CASCADE)
