@@ -5,7 +5,10 @@ from django.conf.urls.static import static
 from django.views.decorators.cache import cache_control
 from movietheater.views import (
     ContentListView,
+    EpisodeScreenshotView,
+    MovieScreenshotView,
     MovieView, MovieDetailView,
+    SeriesScreenshotView,
     SeriesView, SeriesDetailView,
     EpisodeView,
     stream_movie_video,
@@ -37,6 +40,9 @@ urlpatterns = [
     path('media/series/<path:path>', 
          cache_control(no_cache=True)(stream_series_video), 
          name='stream-series-video'),
+    path('movies/<int:movie_id>/screenshots/', MovieScreenshotView.as_view(), name='movie-screenshots'),
+    path('series/<int:series_id>/screenshots/', SeriesScreenshotView.as_view(), name='series-screenshots'),
+    path('episodes/<int:episode_id>/screenshots/', EpisodeScreenshotView.as_view(), name='episode-screenshots'),
 ]
 
 # Подключение медиафайлов

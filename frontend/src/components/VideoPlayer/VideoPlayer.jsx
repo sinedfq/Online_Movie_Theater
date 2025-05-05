@@ -41,7 +41,7 @@ const VideoPlayer = ({ movieId, video360p, video720p, video1080p, onBufferingCha
       </video>
 
       <div className="quality-selector">
-        <label>Качество:</label>
+        <label style={{color: 'white'}}>Качество:</label>
         <select
           value={quality || ''}
           onChange={(e) => setQuality(e.target.value)}

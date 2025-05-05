@@ -9,6 +9,7 @@ const VideoDetailPage = () => {
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [animationStage, setAnimationStage] = useState(0);
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -26,14 +27,48 @@ const VideoDetailPage = () => {
         console.error('Error loading video:', error);
       } finally {
         setLoading(false);
+        setAnimationStage(1);
+        setTimeout(() => setAnimationStage(2), 1500);
       }
     };
 
     loadVideo();
   }, [id]);
 
-  if (loading) {
-    return <div className="loading">Загрузка видео...</div>;
+  const renderLinks = (text) => {
+    if (!text) return null;
+    
+    const regex = /(https?:\/\/[^\s]+)/g;
+    return text.split('\n').map((paragraph, pIndex) => (
+      <p key={pIndex} style={{ marginBottom: '1em' }}>
+        {paragraph.split(regex).map((part, index) => {
+          if (part.match(regex)) {
+            const url = part.trim();
+            return (
+              <a 
+                key={index} 
+                href={url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: '#1976d2', wordBreak: 'break-all' }}
+              >
+                {url}
+              </a>
+            );
+          }
+          return part;
+        })}
+      </p>
+    ));
+  };
+  
+  if (loading || animationStage < 2) {
+    return (
+      <div className={`preloader ${animationStage >= 1 ? 'expanding' : ''}`}>
+        <div className="loader-circle"></div>
+        <div className="loader-text"></div>
+      </div>
+    );
   }
 
   if (!video) {
@@ -42,20 +77,7 @@ const VideoDetailPage = () => {
 
   return (
     <div className="movie-detail-page">
-      <div className="movie-header">
-        <div className="movie-poster">
-          <img
-            src={video.thumbnail}
-            alt={video.title}
-            className="thumbnail-image-details"
-          />
-        </div>
 
-        <div className="movie-info">
-          <h1>{video.title}</h1>
-          <p>{video.description}</p>
-        </div>
-      </div>
 
       <div className="video-wrapper">
         <VideoPlayer
@@ -71,6 +93,13 @@ const VideoDetailPage = () => {
           <div className="buffering-indicator">Буферизация...</div>
         )}
       </div>
+
+      <div className="movie-info" style={{paddingTop: '20px'}}> 
+          <h1>{video.title}</h1>
+          <p>Автор: {video.author}</p>
+          <hr></hr>
+          <div>{renderLinks(video.description)}</div>
+        </div>
     </div>
   );
 };

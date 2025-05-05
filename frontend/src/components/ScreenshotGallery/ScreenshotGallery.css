@@ -1,0 +1,85 @@
+.screenshot-gallery {
+    margin-top: 20px;
+    margin-left: 50px;
+}
+
+.screenshot-grid {
+    
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    align-content: center;
+    /* Сетка */
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.screenshot-item {
+    position: relative;
+    overflow: hidden;
+    /* Обрезка изображения, если оно выходит за рамки контейнера */
+    border-radius: 8px;
+    /* Закругленные углы */
+}
+
+.screenshot-thumbnail {
+    width: 100%;
+    height: 200px;
+    /* Фиксированная высота для всех картинок */
+    object-fit: cover;
+    /* Заполнение контейнера изображением */
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.screenshot-thumbnail:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Стиль модального окна */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    width: 100%;
+}
+
+.modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 80%;
+    text-align: center;
+}
+
+.modal-image {
+    width: 100%;
+    height: 600px;
+    /* Задаем фиксированную высоту для модального изображения */
+    object-fit: cover;
+    /* Картинка заполняет контейнер */
+    border-radius: 8px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.close-button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
