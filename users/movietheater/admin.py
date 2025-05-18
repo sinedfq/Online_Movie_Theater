@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Episode, Movie, Series, Video
+from .models import CustomUser, Episode, Movie, Series, Video
 from .models import MovieScreenshot, SeriesScreenshot, EpisodeScreenshot
 
 # Inline для скриншотов
@@ -35,3 +35,7 @@ class EpisodeAdmin(admin.ModelAdmin):
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ('title', 'typeOF')
+
+@admin.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('avatar',)
