@@ -1,14 +1,15 @@
 from pathlib import Path
 from django.conf import settings
 from django.http import FileResponse, HttpResponse, HttpResponseNotFound
+from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from wsgiref.util import FileWrapper
+from rest_framework import generics
 import urllib.parse
 import os
-from .serializer import EpisodeScreenshotSerializer, MovieScreenshotSerializer, MovieSerializer, SeriesScreenshotSerializer, SeriesSerializer, EpisodeSerializer, VideoSerializer
+from .serializer import EpisodeScreenshotSerializer, MovieScreenshotSerializer, MovieSerializer, SeriesScreenshotSerializer, SeriesSerializer, EpisodeSerializer, VideoSerializer, RegisterSerializer
 from .models import Movie, Series, Episode, Video
 
 class MovieDetailView(APIView):
@@ -236,3 +237,51 @@ class EpisodeScreenshotView(APIView, ScreenshotMixin):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from movietheater.models import CustomUser  # Импортируйте вашу кастомную модель
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class RegisterView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()  # Используйте вашу кастомную модель
+    serializer_class = RegisterSerializer
+
+class LoginView(TokenObtainPairView):
+    pass
+
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    data = {
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'avatar': user.avatar.url if user.avatar else None,  # Добавлено поле avatar
+        # Добавьте другие поля по необходимости
+    }
+    return Response(data)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_avatar(request):
+    if 'avatar' not in request.FILES:
+        return Response(
+            {'error': 'No avatar file provided'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    request.user.avatar = request.FILES['avatar']
+    request.user.save()
+    
+    return Response({
+        'avatar_url': request.build_absolute_uri(request.user.avatar.url)
+    })

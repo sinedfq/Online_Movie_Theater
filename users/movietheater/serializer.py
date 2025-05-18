@@ -1,5 +1,8 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from rest_framework.validators import UniqueValidator
 from .models import Episode, EpisodeScreenshot, Movie, MovieScreenshot, Series, SeriesScreenshot
+
 
 
 class ScreenshotSerializer(serializers.ModelSerializer):
@@ -119,3 +122,41 @@ class SeriesSerializer(serializers.ModelSerializer):
         model = Series
         fields = ['id', 'title', 'description', 'thumbnail', 'typeOF', 'episodes', 'screenshots']
 
+from rest_framework import serializers
+from movietheater.models import CustomUser  # Импортируйте вашу кастомную модель
+from rest_framework.validators import UniqueValidator
+
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+    )
+    password = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = CustomUser  # Используйте вашу кастомную модель
+        fields = ('username', 'password', 'email')  # Укажите поля вашей модели
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create(  # Используйте вашу кастомную модель
+            username=validated_data['username'],
+            email=validated_data['email'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+class UserSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'phone', 'avatar', 'avatar_url')
+        extra_kwargs = {
+            'avatar': {'write_only': True}
+        }
+
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            return self.context['request'].build_absolute_uri(obj.avatar.url)
+        return None

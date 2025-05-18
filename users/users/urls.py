@@ -6,13 +6,17 @@ from django.views.decorators.cache import cache_control
 from movietheater.views import (
     ContentListView,
     EpisodeScreenshotView,
+    LoginView,
     MovieScreenshotView,
     MovieView, MovieDetailView,
+    RegisterView,
     SeriesScreenshotView,
     SeriesView, SeriesDetailView,
     EpisodeView,
     stream_movie_video,
-    stream_series_video
+    stream_series_video,
+    update_avatar,
+    user_profile
 )
 
 urlpatterns = [
@@ -43,6 +47,10 @@ urlpatterns = [
     path('movies/<int:movie_id>/screenshots/', MovieScreenshotView.as_view(), name='movie-screenshots'),
     path('series/<int:series_id>/screenshots/', SeriesScreenshotView.as_view(), name='series-screenshots'),
     path('episodes/<int:episode_id>/screenshots/', EpisodeScreenshotView.as_view(), name='episode-screenshots'),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/login/', LoginView.as_view(), name='login'),
+    path('api/profile/', user_profile, name='user-profile'),
+    path('api/profile/update_avatar/', update_avatar, name='update-avatar'),
 ]
 
 # Подключение медиафайлов

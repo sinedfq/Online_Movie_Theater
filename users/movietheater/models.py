@@ -1,8 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
+def user_avatar_path(instance, filename):
+    return f'avatars/user_{instance.id}/{filename}'
+
+
 class CustomUser(AbstractUser):
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True)
+    avatar = models.ImageField(
+        upload_to=user_avatar_path,
+        blank=True,
+        null=True,
+        verbose_name='Аватар'
+    )
     
     def __str__(self):
         return self.username

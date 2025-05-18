@@ -6,13 +6,12 @@ import './HomePage.css';
 const HomePage = () => {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [animationStage, setAnimationStage] = useState(0);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
         const data = await fetchContent();
-  
-        // Объединяем movies и series в один массив
         const mergedContent = [
           ...data.movies.map(movie => ({ ...movie, typeOF: 'movie' })),
           ...data.series.map(series => ({ ...series, typeOF: 'series' })),
@@ -23,6 +22,7 @@ const HomePage = () => {
       } catch (error) {
         console.error(error);
       } finally {
+        setAnimationStage(1);
         setLoading(false);
       }
     };
