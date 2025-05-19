@@ -93,3 +93,53 @@ class SeriesScreenshot(Screenshot):
 
 class EpisodeScreenshot(Screenshot):
     episode = models.ForeignKey(Episode, related_name='screenshots', on_delete=models.CASCADE)
+
+class Rating(models.Model):
+    """Модель для хранения рейтингов контента"""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    value = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])  # Оценка от 1 до 5
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        abstract = True
+
+class MovieRating(Rating):
+    movie = models.ForeignKey(Movie, related_name='ratings', on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('user', 'movie')  # Один пользователь - одна оценка на фильм
+
+class SeriesRating(Rating):
+    series = models.ForeignKey(Series, related_name='ratings', on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('user', 'series')
+
+class VideoRating(Rating):
+    video = models.ForeignKey(Video, related_name='ratings', on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('user', 'video')
+
+class UserContentStatus(models.Model):
+    """Модель для хранения статусов контента пользователя"""
+    STATUS_CHOICES = [
+        ('favorite', 'Избранное'),
+        ('watched', 'Просмотрено'),
+        ('watchlist', 'Смотреть позже'),
+    ]
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    content_type = models.CharField(max_length=50)  # 'movie', 'series', 'video'
+    content_id = models.PositiveIntegerField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user', 'content_type', 'content_id', 'status')
+        indexes = [
+            models.Index(fields=['user', 'content_type', 'status']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user} - {self.content_type} {self.content_id} - {self.status}"

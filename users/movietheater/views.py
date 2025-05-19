@@ -1,16 +1,22 @@
+import urllib.parse
 from pathlib import Path
 from django.conf import settings
-from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from django.contrib.auth.models import User
+from django.http import FileResponse, HttpResponse, HttpResponseNotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework import generics
-import urllib.parse
-import os
-from .serializer import EpisodeScreenshotSerializer, MovieScreenshotSerializer, MovieSerializer, SeriesScreenshotSerializer, SeriesSerializer, EpisodeSerializer, VideoSerializer, RegisterSerializer
-from .models import Movie, Series, Episode, Video
+from rest_framework.decorators import action
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin
+from rest_framework.permissions import IsAuthenticated
+from .serializer import EpisodeScreenshotSerializer, MovieScreenshotSerializer, MovieSerializer, SeriesScreenshotSerializer, SeriesSerializer, EpisodeSerializer, UserContentStatusSerializer, VideoSerializer, RegisterSerializer
+from .models import Movie, Series, Episode, UserContentStatus, Video
+from .models import MovieRating, SeriesRating, VideoRating
+from .serializer import MovieRatingSerializer, SeriesRatingSerializer, VideoRatingSerializer
+
 
 class MovieDetailView(APIView):
     def get(self, request, pk):
@@ -28,7 +34,7 @@ class MovieView(APIView):
                 movie = Movie.objects.get(pk=pk)
                 serializer = MovieSerializer(movie, context={'request': request})
                 return Response(serializer.data)
-            except Movie.DoesNotExist:
+            except Video.DoesNotExist:
                 return Response(status=404)
         
         movies = Movie.objects.all()
@@ -285,3 +291,164 @@ def update_avatar(request):
     return Response({
         'avatar_url': request.build_absolute_uri(request.user.avatar.url)
     })
+
+
+class RatingMixin:
+    permission_classes = [IsAuthenticated]
+    
+    def get_content_object(self, model_class, pk):
+        try:
+            return model_class.objects.get(pk=pk)
+        except model_class.DoesNotExist:
+            return None
+
+class MovieRatingView(APIView, RatingMixin):
+    def post(self, request, movie_id):
+        movie = self.get_content_object(Movie, movie_id)
+        if not movie:
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        value = request.data.get('value')
+        if not value or not (1 <= int(value) <= 5):
+            return Response(
+                {'error': 'Rating value must be between 1 and 5'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        rating, created = MovieRating.objects.update_or_create(
+            user=request.user,
+            movie=movie,
+            defaults={'value': value}
+        )
+        
+        serializer = MovieRatingSerializer(rating, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+class SeriesRatingView(APIView, RatingMixin):
+    def post(self, request, series_id):
+        series = self.get_content_object(Series, series_id)
+        if not series:
+            return Response({'error': 'Series not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        value = request.data.get('value')
+        if not value or not (1 <= int(value) <= 5):
+            return Response(
+                {'error': 'Rating value must be between 1 and 5'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        rating, created = SeriesRating.objects.update_or_create(
+            user=request.user,
+            series=series,
+            defaults={'value': value}
+        )
+        
+        serializer = SeriesRatingSerializer(rating, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+class VideoRatingView(APIView, RatingMixin):
+    def post(self, request, video_id):
+        video = self.get_content_object(Video, video_id)
+        if not video:
+            return Response({'error': 'Video not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        value = request.data.get('value')
+        if not value or not (1 <= int(value) <= 5):
+            return Response(
+                {'error': 'Rating value must be between 1 and 5'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        rating, created = VideoRating.objects.update_or_create(
+            user=request.user,
+            video=video,
+            defaults={'value': value}
+        )
+        
+        serializer = VideoRatingSerializer(rating, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+    
+class UserContentStatusViewSet(GenericViewSet, CreateModelMixin, DestroyModelMixin, ListModelMixin):
+    queryset = UserContentStatus.objects.all()
+    serializer_class = UserContentStatusSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(user=self.request.user)
+        
+        # Добавляем фильтрацию по параметрам запроса
+        content_type = self.request.query_params.get('content_type')
+        content_id = self.request.query_params.get('content_id')
+        
+        if content_type:
+            queryset = queryset.filter(content_type=content_type)
+        if content_id:
+            queryset = queryset.filter(content_id=content_id)
+            
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['GET'])
+    def favorites(self, request):
+        favorites = self.get_queryset().filter(status='favorite')
+        serializer = self.get_serializer(favorites, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def watched(self, request):
+        watched = self.get_queryset().filter(status='watched')
+        serializer = self.get_serializer(watched, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def watchlist(self, request):
+        watchlist = self.get_queryset().filter(status='watchlist')
+        serializer = self.get_serializer(watchlist, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['POST'])
+    def toggle_status(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        content_type = serializer.validated_data['content_type']
+        content_id = serializer.validated_data['content_id']
+        content_status = serializer.validated_data['status']
+        
+        # Проверяем существование контента
+        model_map = {
+            'movie': Movie,
+            'series': Series,
+            'video': Video
+        }
+        
+        if content_type not in model_map:
+            return Response(
+                {'error': 'Invalid content type'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            model_map[content_type].objects.get(pk=content_id)
+        except ObjectDoesNotExist:
+            return Response(
+                {'error': 'Content not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Проверяем существование статуса
+        instance = self.get_queryset().filter(
+            content_type=content_type,
+            content_id=content_id,
+            status=content_status
+        ).first()
+        
+        if instance:
+            instance.delete()
+            return Response({'status': 'removed'}, status=status.HTTP_200_OK)
+        else:
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    

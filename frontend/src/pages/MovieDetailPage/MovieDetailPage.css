@@ -214,3 +214,92 @@
       transform: scale(1);
   }
 }
+
+.rating-section {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.average-rating, .user-rating {
+  display: flex;
+  align-items: center;
+}
+
+.user-rating {
+  font-size: 14px;
+  color: #ffffffa8;
+}
+
+.user-rating span {
+  margin-right: 8px;
+}
+
+/* Добавьте эти стили в конец файла */
+
+.rating-section {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rating-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ratings-count {
+  font-size: 14px;
+  color: #000000a8;
+}
+
+.user-rating-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.user-rating-display, .user-rating-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-rating-display span, .user-rating-edit span {
+  font-size: 14px;
+  color: #000000a8;
+}
+
+.change-rating-btn, .cancel-rating-btn {
+  background: none;
+  border: 1px solid #1976d2;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s;
+}
+
+.change-rating-btn:hover, .cancel-rating-btn:hover {
+  background: rgba(25, 118, 210, 0.1);
+}
+
+.cancel-rating-btn {
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.cancel-rating-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+}

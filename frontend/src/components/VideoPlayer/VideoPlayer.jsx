@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import './VideoPlayer.css'
 
 const VideoPlayer = ({ movieId, video360p, video720p, video1080p, onBufferingChange, poster: thumbnail }) => {
   const [quality, setQuality] = useState(null);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const videoRef = useRef(null);
+  const controlsTimeoutRef = useRef(null);
+  const controlsRef = useRef(null);
 
   const getVideoUrl = () => {
     if (quality) return quality;
@@ -11,67 +22,218 @@ const VideoPlayer = ({ movieId, video360p, video720p, video1080p, onBufferingCha
     return null;
   };
 
+  const availableQualities = [
+    { url: video1080p, label: '1080p' },
+    { url: video720p, label: '720p' },
+    { url: video360p, label: '360p' }
+  ].filter(q => q.url);
+
   useEffect(() => {
     const availableQuality = getVideoUrl();
     setQuality(availableQuality);
   }, [video360p, video720p, video1080p]);
 
+  const handlePlayPause = () => {
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    const current = videoRef.current.currentTime;
+    const dur = videoRef.current.duration || 0;
+    setCurrentTime(current);
+    setDuration(dur);
+
+    const progressPercent = (current / dur) * 100;
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+      progressBar.style.setProperty('--progress', `${progressPercent}%`);
+    }
+  };
+
+  const handleSeek = (e) => {
+    const seekTime = parseFloat(e.target.value);
+    videoRef.current.currentTime = seekTime;
+    setCurrentTime(seekTime);
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    videoRef.current.volume = newVolume;
+    setVolume(newVolume);
+  };
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      videoRef.current.parentElement.requestFullscreen?.().catch(err => {
+        console.error('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+
+  const handleMouseMove = () => {
+    setShowControls(true);
+    clearTimeout(controlsTimeoutRef.current);
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000);
+  };
+
+  const handleQualitySelect = (url) => {
+    const current = videoRef.current.currentTime;
+    const isCurrentlyPlaying = !videoRef.current.paused;
+
+    setQuality(url);
+    setShowQualityMenu(false);
+
+    setTimeout(() => {
+      videoRef.current.currentTime = current;
+      if (isCurrentlyPlaying) {
+        videoRef.current.play().catch(e => console.error('Playback error:', e));
+      }
+    }, 100); // небольшой таймаут, чтобы успел подгрузиться src
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const handleKeyDown = (e) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        handlePlayPause();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(controlsTimeoutRef.current);
+    };
+  }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   return (
-    <div className="video-container">
+    <div
+      className="video-container"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => isPlaying && setShowControls(false)}
+    >
       <video
+        ref={videoRef}
         key={`${movieId}-${quality}`}
-        controls
         style={{
           width: '100%',
-          height: 'auto',
-          maxWidth: '100%',
-          aspectRatio: '16/9',
+          height: '100%',
           backgroundColor: '#000',
-          objectFit: 'contain'
+          cursor: 'pointer'
         }}
+        onClick={handlePlayPause}
+        onDoubleClick={toggleFullscreen}
         preload="auto"
         poster={thumbnail}
         controlsList="nodownload"
         onWaiting={() => onBufferingChange(true)}
-        onPlaying={() => onBufferingChange(false)}
+        onPlaying={() => {
+          onBufferingChange(false);
+          setIsPlaying(true);
+        }}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onTimeUpdate={handleTimeUpdate}
+        onDurationChange={(e) => setDuration(e.target.duration)}
         onError={(e) => console.error(`Ошибка видео ${movieId}:`, e.target.error)}
       >
         <source src={getVideoUrl()} type="video/mp4" />
         Ваш браузер не поддерживает видео.
       </video>
 
-      <div className="quality-selector">
-        <label style={{color: 'white'}}>Качество:</label>
-        <select
-          value={quality || ''}
-          onChange={(e) => setQuality(e.target.value)}
-          disabled={!video360p && !video720p && !video1080p}
-          style={{
-            padding: '10px 15px',
-            fontSize: '16px',
-            borderRadius: '8px',
-            border: '2px solid #4f46e5',
-            backgroundColor: '#ffffff',
-            color: '#1f2937',
-            cursor: 'pointer',
-            outline: 'none',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            transition: 'all 0.3s ease',
-            width: '120px',
-            appearance: 'none',
-            backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234f46e5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 10px center',
-            backgroundSize: '12px auto'
-          }}
-          className={`select-quality ${(!video360p && !video720p && !video1080p) ? 'disabled' : ''}`}
-        >
-          {video360p && <option value={video360p}>360p</option>}
-          {video720p && <option value={video720p}>720p</option>}
-          {video1080p && <option value={video1080p}>1080p</option>}
-        </select>
-      </div>
+      <div
+        className={`video-controls ${showControls ? 'visible' : ''}`}
+        ref={controlsRef}
+      >
+        <div className="progress-bar-container">
+          <input
+            type="range"
+            className="progress-bar"
+            min="0"
+            max={duration || 100}
+            value={currentTime}
+            onChange={handleSeek}
+          />
+        </div>
 
+        <div className="main-controls">
+          <div className="left-controls">
+            <button className="control-btn" onClick={handlePlayPause}>
+              {isPlaying ? '⏸️' : '▶️'}
+            </button>
+            <div className="volume-control">
+              <button className="control-btn">
+                {volume === 0 ? '🔇' : volume > 0.5 ? '🔊' : '🔉'}
+              </button>
+              <input
+                type="range"
+                className="volume-slider"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={handleVolumeChange}
+              />
+            </div>
+            <div className="time-display">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </div>
+          </div>
+
+          <div className="right-controls">
+            <div className="quality-selector">
+              <button
+                className="control-btn quality-btn"
+                onClick={() => setShowQualityMenu(!showQualityMenu)}
+              >
+                 {availableQualities.find(q => q.url === quality)?.label || 'Авто'}
+              </button>
+              {showQualityMenu && (
+                <div className="quality-menu">
+                  {availableQualities.map((q) => (
+                    <button
+                      key={q.url}
+                      className={`quality-option ${quality === q.url ? 'active' : ''}`}
+                      onClick={() => handleQualitySelect(q.url)}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button className="control-btn" onClick={toggleFullscreen}>
+              {isFullscreen ? '🞬' : '⛶'}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

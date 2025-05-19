@@ -1,9 +1,11 @@
 .profile-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center;  /* Центрируем по горизонтали */
+  align-items: flex-start;  /* По вертикали сверху */
   min-height: 80vh;
   padding: 20px;
+  width: 100vw;             /* Растянуть контейнер на всю ширину окна */
+  box-sizing: border-box;   /* Чтобы padding учитывался в ширине */
 }
 
 .profile-card {
@@ -11,14 +13,17 @@
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
+
+  width: 100%;             /* Занимает всю ширину контейнера */
+  max-width: 900px;        /* Максимальная ширина карточки */
+  box-sizing: border-box;  /* Padding учитывается в ширине */
 }
 
 .profile-card h2 {
   text-align: center;
   margin-bottom: 1.5rem;
   color: #333;
+  font-size: 1.8rem;
 }
 
 .profile-info {
@@ -81,28 +86,7 @@
   background-color: #cc0000;
 }
 
-/* Добавьте эти стили в существующий файл */
-
-.avatar-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.profile-avatar {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #4285f4;
-}
-
-.profile-card h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 1.8rem;
-}
+/* Avatar styles */
 
 .avatar-container {
   position: relative;
@@ -122,27 +106,73 @@
 }
 
 .avatar-upload-label {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   cursor: pointer;
+  display: inline-block;
 }
 
 .avatar-upload-text {
-  background-color: #4285f4;
   color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  opacity: 0;
-  transition: opacity 0.3s;
+  font-size: 0.9rem;
+  font-weight: bold;
 }
 
-.avatar-container:hover .avatar-upload-text {
+.avatar-upload-label:hover .avatar-overlay {
   opacity: 1;
 }
 
 .avatar-container:hover .profile-avatar {
   opacity: 0.8;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  max-height: 150px;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background-color: #eee;
+  border: none;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  user-select: none;
+}
+
+.tab-btn:hover:not(.active) {
+  background-color: #ddd;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 117, 252, 0.6);
+}
+
+.tab-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.5);
 }
