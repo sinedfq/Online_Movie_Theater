@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AuthForms.css'; // Общие стили для форм аутентификации
-
+import api from '../../services/api'
 function LoginForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -32,7 +32,7 @@ function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/login/', formData);
+      const response = await api.post('/token/', formData);
       console.log('Login successful:', response.data);
       
       localStorage.setItem('access_token', response.data.access);

@@ -1,0 +1,29 @@
+.star-rating {
+  display: inline-flex;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.star {
+  color: #ccc;
+  cursor: default;
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.star.interactive {
+  cursor: pointer;
+}
+
+.star.interactive:hover {
+  color: #ffc107;
+}
+
+.rating-value {
+  font-size: 16px;
+  color: #000000a8;
+  margin-left: 8px;
+}

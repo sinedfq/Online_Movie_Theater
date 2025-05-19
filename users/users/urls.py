@@ -1,23 +1,36 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.cache import cache_control
+from rest_framework.routers import DefaultRouter
 from movietheater.views import (
     ContentListView,
     EpisodeScreenshotView,
     LoginView,
+    MovieRatingView,
     MovieScreenshotView,
     MovieView, MovieDetailView,
     RegisterView,
+    SeriesRatingView,
     SeriesScreenshotView,
     SeriesView, SeriesDetailView,
     EpisodeView,
+    VideoRatingView,
     stream_movie_video,
     stream_series_video,
     update_avatar,
-    user_profile
+    user_profile,
+    UserContentStatusViewSet
 )
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+router = DefaultRouter()
+router.register(r'user-content-status', UserContentStatusViewSet, basename='user-content-status')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -51,7 +64,12 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/profile/', user_profile, name='user-profile'),
     path('api/profile/update_avatar/', update_avatar, name='update-avatar'),
-]
-
+    path('api/movies/<int:movie_id>/rate/', MovieRatingView.as_view(), name='rate-movie'),
+    path('api/series/<int:series_id>/rate/', SeriesRatingView.as_view(), name='rate-series'),
+    path('api/videos/<int:video_id>/rate/', VideoRatingView.as_view(), name='rate-video'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/', include(router.urls)),
+] 
 # Подключение медиафайлов
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

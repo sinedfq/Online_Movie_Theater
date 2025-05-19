@@ -57,7 +57,7 @@
 }
 
 .navbar-link:hover {
-  color: #f5a623;
+  color: #4c64ff;
 }
 
 .navbar-link::after {
@@ -67,7 +67,7 @@
   left: 0;
   width: 0;
   height: 2px;
-  background-color: #f5a623;
+  background-color: #4c64ff;
   transition: width 0.3s ease;
 }
 
